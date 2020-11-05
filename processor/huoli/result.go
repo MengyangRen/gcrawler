@@ -34,17 +34,17 @@ func Task(tid int, w thread.Worker) thread.Result {
 	defer utils.CatchPanic("BUSINESS-THROW-PANIC-37406")
 	var lp model.LivePram
 	utils.Json2Struct([]byte(w.Body), &lp)
-	_, html := utils.NewSimpleHttp().SetHeader().Get(lp.LiveAddress)
-	utils.RandSleep(3)
+	_, html := utils.NewSimpleHttp().SetHeader("houli").Get(lp.LiveAddress)
 
+	utils.RandSleep(3)
 	if html == nil {
 		return __faild()
 	}
 
 	liverUrl := crawler.NewHlCrawler().Live(html)
-	//get live detailed
 
-	_, html = utils.NewSimpleHttp().SetHeader().Get(liverUrl)
+	//get live detailed
+	_, html = utils.NewSimpleHttp().SetHeader("houli").Get(liverUrl)
 	if html == nil {
 		return __faild()
 	}

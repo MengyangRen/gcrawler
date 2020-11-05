@@ -16,10 +16,12 @@ package utils
  */
 
 import (
+	"crypto/tls"
 	"fmt"
 	"gcrawler/model"
 	"gcrawler/rule"
 	"net/http"
+	"net/url"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -27,7 +29,7 @@ import (
 var ()
 
 type SimpleHttp struct {
-	Client       http.Client       //定义客户端属性
+	Client       *http.Client      //定义客户端属性
 	Header       map[string]string //请求头
 	ResponHeader string            //响应头
 	ResponBody   string            //响应body
@@ -38,11 +40,29 @@ type SimpleHttp struct {
 //create obj
 func NewSimpleHttp() *SimpleHttp {
 	return &SimpleHttp{
-		Client:       http.Client{},
+		Client:       &http.Client{},
 		Header:       make(map[string]string),
 		ResponHeader: "",
 		ResponBody:   "",
 	}
+}
+
+func (this *SimpleHttp) UseProxy() *SimpleHttp {
+	//忽略https认证
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+	}
+	proxyUrl, err := url.Parse(NewIPProxyPool().Rand())
+	if err == nil { // seting proxy
+		tr.Proxy = http.ProxyURL(proxyUrl)
+	}
+
+	this.Client = &http.Client{
+		Transport: tr,
+	}
+	return this
 }
 
 //get respon Body
@@ -52,8 +72,12 @@ func (this *SimpleHttp) Body() string {
 
 //sethader
 //func (this *SimpleHttp) SetHeader(header map[string]string) *SimpleHttp {
-func (this *SimpleHttp) SetHeader() *SimpleHttp {
-	this.Header = rule.GCrawlerHeader["huoli"]
+func (this *SimpleHttp) SetHeader(h string) *SimpleHttp {
+	if h != "" {
+		this.Header = rule.GCrawlerHeader[h]
+		return this
+	}
+	this.Header = rule.GCrawlerHeader["default"]
 	return this
 }
 
@@ -76,19 +100,41 @@ func (this *SimpleHttp) Get(url string) (*SimpleHttp, *goquery.Document) {
 
 	this.Response = resp
 
-	//body, err := ioutil.ReadAll(resp.Body)
-	// if err != nil {
-	// 	Error(fmt.Sprintf("[error] NewSimpleHttp().Get(x) ioutil.ReadAll Detailed:%q", err))
-	// 	this.Error = ERROR_CLICENT_FETCH_READ
-	// 	return this
-	// }
-	//this.ResponBody = string(body)
 	for key, val := range this.Header {
 		resp.Header.Set(key, val)
-		//resp.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36")
 	}
 
 	doc, _ := goquery.NewDocumentFromReader(resp.Body)
 	defer resp.Body.Close()
 	return this, doc
 }
+
+// //use Proxy
+// func (this *SimpleHttp) UseProxyGet(u string, proxy string) error {
+// 	req, err := http.NewRequest(http.MethodGet, u, nil)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	tr := &http.Transport{TLSClientConfig: &tls.Config{
+// 		InsecureSkipVerify: true,
+// 	}}
+// 	if proxy != "" {
+// 		proxyUrl, err := url.Parse(proxy)
+// 		if err == nil { // 使用传入代理
+// 			tr.Proxy = http.ProxyURL(proxyUrl)
+// 		}
+// 	}
+// 	r, err := (&http.Client{Transport: tr}).Do(req)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	if r != nil {
+// 		defer r.Body.Close()
+// 	}
+// 	b, err := ioutil.ReadAll(r.Body)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	fmt.Println("useProxyURL:", string(b))
+// 	return nil
+// }

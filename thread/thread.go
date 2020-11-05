@@ -51,6 +51,10 @@ type Worker struct {
 	Body string
 }
 
+func (this *Worker) IsEmpty() bool {
+	return reflect.DeepEqual(this, Worker{})
+}
+
 //definition thread
 type Thread struct {
 	WorkerChan       chan Worker

@@ -63,5 +63,15 @@ var (
 			"User-Agent":      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36",
 			"Cookie":          "__51cke__=; Hm_lvt_5364f18b8f6e3730ab236adafd0d5d57=1603109810,1603945791,1604043217; td_cookie=2692290499; __tins__20760639=%7B%22sid%22%3A%201604043217141%2C%20%22vd%22%3A%207%2C%20%22expires%22%3A%201604045110366%7D; __51laig__=7; Hm_lpvt_5364f18b8f6e3730ab236adafd0d5d57=1604043311",
 		},
+
+		"default": map[string]string{
+			"Host": "www.baidu.com",
+			//"X-Requested-With":          "XMLHttpRequest",
+			"Upgrade-Insecure-Requests": "1",
+			"Referer":                   "http://www.baidu.com",
+			"Accept-Language":           "zh-CN,zh;q=0.9,en;q=0.8",
+			"User-Agent":                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36",
+			"Cookie":                    "__51cke__=; Hm_lvt_5364f18b8f6e3730ab236adafd0d5d57=1603109810,1603945791,1604043217; td_cookie=2692290499; __tins__20760639=%7B%22sid%22%3A%201604043217141%2C%20%22vd%22%3A%207%2C%20%22expires%22%3A%201604045110366%7D; __51laig__=7; Hm_lpvt_5364f18b8f6e3730ab236adafd0d5d57=1604043311",
+		},
 	}
 )

@@ -29,25 +29,21 @@ const (
 
 type JrskqProcessor struct{}
 
-func NewJrskqProcessor() *JrskqProcessor {
-	return &JrskqProcessor{}
-}
-
+func NewJrskqProcessor() *JrskqProcessor { return &JrskqProcessor{} }
 func (this *JrskqProcessor) _hlth() {
-	utils.ReadMemoryStats()
-	ws, length, r := this._ghl()
-	if r != nil {
+	ws, length, _ := this._ghl()
+	if length <= 0 {
 		return
 	}
+	utils.ReadMemoryStats()
 	thread.NewThread(length, Task, Finished).Run(length/2, ws)
 	utils.ReadMemoryStats()
 }
-
 func (this *JrskqProcessor) _ghl() (ws []thread.Worker, length int, r error) {
 	_hlt := service.NewMatchService().Get3HoursLiveItems(JRSKQ_TABLE_ID)
 	lenght := len(_hlt.D)
 	//数据为空清空直接 false
-	if lenght < 0 {
+	if lenght <= 0 {
 		return nil, 0, model.ERROR_TASK_3HOURS_DATA_EMPTY
 	}
 	for i := 0; i < lenght; i++ {
@@ -62,19 +58,23 @@ func (this *JrskqProcessor) _ghl() (ws []thread.Worker, length int, r error) {
 }
 
 func (this *JrskqProcessor) _cr() {
-	_, html := utils.NewSimpleHttp().SetHeader().Get(rule.GCrawler["jrskq"]["url"])
+	
+	_, html := utils.NewSimpleHttp().SetHeader("jrskq").Get(rule.GCrawler["jrskq"]["url"])
+
 	if html == nil {
 		return
 	}
 	match := crawler.NewJrskqCrawler().Match(html)
-	//utils.Debug(match)
 	service.NewMatchService().Store(match, JRSKQ_TABLE_ID)
 }
-
-func Boot() {
-	utils.Debug("processor->for->goroutine->jrskq->boot->Scan..")
+func (this *JrskqProcessor) Scan() {
 	jrskq := NewJrskqProcessor()
 	jrskq._cr()
 	jrskq._ghl()
-	utils.Debug("jrskq->scan exit..")
+}
+
+func Boot() {
+	utils.Debug("processor->for->goroutine->jrskq->boot->Scan")
+	NewJrskqProcessor().Scan()
+	utils.Debug("jrskq->scan exit")
 }

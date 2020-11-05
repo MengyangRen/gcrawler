@@ -1,6 +1,7 @@
 package processor
 
 import (
+	"gcrawler/processor/demo"
 	"gcrawler/processor/huoli"
 	"gcrawler/processor/jrskq"
 	"gcrawler/thread"
@@ -61,7 +62,7 @@ func (this *Processor) Register() *Processor {
 	this.Calls = map[string]func(){
 		"huoli": huoli.Boot,
 		"jrskq": jrskq.Boot,
-		//	"jrs":   jrs.Boot,
+		"demo":  demo.Boot,
 	}
 	return this
 }

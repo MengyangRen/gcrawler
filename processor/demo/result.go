@@ -30,8 +30,6 @@ func Task(tid int, w thread.Worker) thread.Result {
 	//下面代码未make
 	defer utils.CatchPanic("BUSINESS-THROW-PANIC-37406")
 
-	var myMap map[int]string
-	myMap[0] = "小明" // error
 	return thread.Result{
 		Code:    200,
 		Message: "SUCCESS",
@@ -47,7 +45,6 @@ func Finished(rc <-chan thread.Result, lenght int) {
 	faiNum := 0
 	for i := 0; i < lenght; i++ {
 		_d := <-rc
-		//utils.Debug(_d)
 		switch _d.Code {
 		//suc
 		case 200:
@@ -55,19 +52,12 @@ func Finished(rc <-chan thread.Result, lenght int) {
 		//faii
 		case 500:
 			faiNum++
-
 		}
-
-		// if _d.IsEmpty() {
-		// 	utils.Debug("空")
-		// }
 	}
-
 	utils.Debug(fmt.Sprintf("Task.Name:%s", "demo-gcrawler"))
 	utils.Debug(fmt.Sprintf("Task.TotalNum:%d", lenght))
 	utils.Debug(fmt.Sprintf("Task.SuccessNum:%d", sucNum))
 	utils.Debug(fmt.Sprintf("Task.FaiNum:%d", faiNum))
-
 }
 
 //FAILURE

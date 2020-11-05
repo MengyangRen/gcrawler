@@ -15,7 +15,6 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"math/rand"
 	"runtime"
 	"strconv"
@@ -142,8 +141,10 @@ func ReadMemoryStats() {
 	var ms runtime.MemStats
 	runtime.ReadMemStats(&ms)
 
-	log.Printf("\n程序向应用程序申请的内存(HeapSys):%v\n堆上内存分配(Alloc):%v\n堆未使用的内存(HeapIdle):%v\n堆释放的内存(HeapReleased):%v",
-		ByteSize(ms.HeapSys), ByteSize(ms.Alloc), ByteSize(ms.HeapIdle), ByteSize(ms.HeapReleased))
+	//log.Printf("\n程序向应用程序申请的内存(HeapSys):%v\n堆上内存分配(Alloc):%v\n堆未使用的内存(HeapIdle):%v\n堆释放的内存(HeapReleased):%v",
+	//	ByteSize(ms.HeapSys), ByteSize(ms.Alloc), ByteSize(ms.HeapIdle), ByteSize(ms.HeapReleased))
+	Info(fmt.Sprintf("\n\t程序向应用程序申请的内存(HeapSys):%v\n\t堆上内存分配(Alloc):%v\n\t堆未使用的内存(HeapIdle):%v\n\t堆释放的内存(HeapReleased):%v", ByteSize(ms.HeapSys), ByteSize(ms.Alloc), ByteSize(ms.HeapIdle), ByteSize(ms.HeapReleased)))
+
 }
 
 func ByteSize(bytes uint64) string {

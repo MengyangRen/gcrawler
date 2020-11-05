@@ -53,24 +53,28 @@ func NewHlProcessor() *HlProcessor {
 }
 
 func (this *HlProcessor) Scan() {
-	for {
-		WaitGroupWrapper := &thread.WaitGroupWrapper{}
-		WaitGroupWrapper.Wrap(func() {
-			utils.Debug("processor->for->goroutine->huoli->boot->Scan..")
-			this._cr()
-			//开始工作
-			this._hlth()
-			//随机睡眠(1-10秒) 让出CPU使用权
-			time.Sleep(time.Duration(rand.Intn(20)) * time.Second)
-		})
-		WaitGroupWrapper.Wait()
-
-		utils.Debug("huoli->scan exit..")
-	}
+	this._cr()
+	//开始工作
+	this._hlth()
+	//随机睡眠(1-10秒) 让出CPU使用权
+	time.Sleep(time.Duration(rand.Intn(20)) * time.Second)
+	// for {
+	// 	WaitGroupWrapper := &thread.WaitGroupWrapper{}
+	// 	WaitGroupWrapper.Wrap(func() {
+	// 		utils.Debug("processor->for->goroutine->huoli->boot->Scan..")
+	// 		this._cr()
+	// 		//开始工作
+	// 		this._hlth()
+	// 		//随机睡眠(1-10秒) 让出CPU使用权
+	// 		time.Sleep(time.Duration(rand.Intn(20)) * time.Second)
+	// 	})
+	// 	WaitGroupWrapper.Wait()
+	// }
 }
 
 func (this *HlProcessor) _cr() {
-	_, html := utils.NewSimpleHttp().SetHeader().Get(rule.GCrawler["huoli"]["url"])
+
+	_, html := utils.NewSimpleHttp().SetHeader("houli").Get(rule.GCrawler["huoli"]["url"])
 	//一定要判断
 	if html == nil {
 		return
@@ -82,20 +86,19 @@ func (this *HlProcessor) _cr() {
 }
 
 func (this *HlProcessor) _hlth() {
-	utils.ReadMemoryStats()
-	ws, length, r := this._ghl()
-	if r != nil {
+	ws, length, _ := this._ghl()
+	if length <= 0 {
 		return
 	}
+	utils.ReadMemoryStats()
 	thread.NewThread(length, Task, Finished).Run(length/2, ws)
 	utils.ReadMemoryStats()
 }
-
 func (this *HlProcessor) _ghl() (ws []thread.Worker, length int, r error) {
 	_hlt := service.NewMatchService().Get3HoursLiveItems(HUOLI_TABLE_ID)
 	lenght := len(_hlt.D)
 	//数据为空清空直接 false
-	if lenght < 0 {
+	if lenght <= 0 {
 		return nil, 0, model.ERROR_TASK_3HOURS_DATA_EMPTY
 	}
 	for i := 0; i < lenght; i++ {
@@ -111,5 +114,7 @@ func (this *HlProcessor) _ghl() (ws []thread.Worker, length int, r error) {
 
 //boot
 func Boot() {
+	utils.Debug("processor->for->goroutine->huoli->boot->Scan")
 	NewHlProcessor().Scan()
+	utils.Debug("huoli->scan exit")
 }
