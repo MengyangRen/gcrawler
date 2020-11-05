@@ -63,14 +63,14 @@ type Thread struct {
 	WorkerFinishChan chan bool
 	//register callback
 	TaskCallBack     func(tid int, w Worker) Result
-	FinishedCallBack func(rc <-chan Result, lenght int)
+	FinishedCallBack func(rc <-chan Result, lenght int, start time.Time)
 }
 
 //create new thread
 func NewThread(
 	WorkerNum int,
 	Task func(tid int, w Worker) Result,
-	Finished func(rc <-chan Result, lenght int)) *Thread {
+	Finished func(rc <-chan Result, lenght int, start time.Time)) *Thread {
 	return &Thread{
 		WorkerNum:        WorkerNum,
 		WorkerChan:       make(chan Worker, WorkerNum),
@@ -121,16 +121,15 @@ func (this *Thread) Consume(consumeNum int) {
 
 //start
 func (this *Thread) Run(consumeNum int, w []Worker) {
-	start := time.Now().Unix()
+	start := time.Now()
 	this.Produce(w)
 	this.Consume(consumeNum)
 	for i := 0; i < this.WorkerNum; i++ {
 		<-this.WorkerFinishChan
 	}
-	end := time.Now().Unix()
-	utils.Debug(fmt.Sprintf("Thread.UseTime:%d", end-start))
-	utils.Debug(fmt.Sprintf("ResultChan.len:%d", len(this.ResultChan)))
-	this.FinishedCallBack(this.ResultChan, len(this.ResultChan))
+	//utils.Debug(fmt.Sprintf("Thread.UseTime:%d", end-start))
+	//utils.Debug(fmt.Sprintf("ResultChan.len:%d", len(this.ResultChan)))
+	this.FinishedCallBack(this.ResultChan, len(this.ResultChan), start)
 	this.Close()
 }
 

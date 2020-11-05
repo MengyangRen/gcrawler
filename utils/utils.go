@@ -147,6 +147,14 @@ func ReadMemoryStats() {
 
 }
 
+func ShowTaskFruitUI(start time.Time, name string, len int, sn int, fn int) {
+	Info(fmt.Sprintf("\tTask.Name:%s", name))
+	Info(fmt.Sprintf("\tTask.UseTime:%.2fs", time.Since(start).Seconds()))
+	Info(fmt.Sprintf("\tTask.TotalNum:%d", len))
+	Info(fmt.Sprintf("\tTask.SuccessNum:%d", sn))
+	Info(fmt.Sprintf("\tTask.FaiNum:%d", fn))
+}
+
 func ByteSize(bytes uint64) string {
 	unit := ""
 	value := float64(bytes)

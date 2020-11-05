@@ -8,7 +8,7 @@ package rule
  *
  * @author  m.y <j01428@kok.work>
  * @date
- * @package crawler
+ * @package rule
  * @description
  *
  */

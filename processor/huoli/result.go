@@ -25,6 +25,7 @@ import (
 	"gcrawler/service"
 	"gcrawler/thread"
 	"gcrawler/utils"
+	"time"
 )
 
 //result halder (type row)
@@ -65,7 +66,7 @@ func Task(tid int, w thread.Worker) thread.Result {
 //callback one
 //result collect (type all)
 //to db  to redis
-func Finished(rc <-chan thread.Result, lenght int) {
+func Finished(rc <-chan thread.Result, lenght int, start time.Time) {
 	sucNum := 0
 	faiNum := 0
 	for i := 0; i < lenght; i++ {
@@ -83,10 +84,7 @@ func Finished(rc <-chan thread.Result, lenght int) {
 			faiNum++
 		}
 	}
-	utils.Debug(fmt.Sprintf("Task.Name:%s", "huoli-gcrawler"))
-	utils.Debug(fmt.Sprintf("Task.TotalNum:%d", lenght))
-	utils.Debug(fmt.Sprintf("Task.SuccessNum:%d", sucNum))
-	utils.Debug(fmt.Sprintf("Task.FaiNum:%d", faiNum))
+	utils.ShowTaskFruitUI(start, "huoli-gcrawler", lenght, sucNum, faiNum)
 }
 
 //FAILURE

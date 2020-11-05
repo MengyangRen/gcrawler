@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"gcrawler/thread"
 	"gcrawler/utils"
+	"time"
 )
 
 //result halder (type row)
@@ -40,7 +41,7 @@ func Task(tid int, w thread.Worker) thread.Result {
 //callback one
 //result collect (type all)
 //to db  to redis
-func Finished(rc <-chan thread.Result, lenght int) {}
+func Finished(rc <-chan thread.Result, lenght int, start time.Time) {}
 
 //FAILURE
 func __faild() thread.Result {
