@@ -1,0 +1,190 @@
+package main
+
+/**
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ *
+ * Gcrawlerfu
+ *
+ * @author  m.y <j01428@kok.work>
+ * @date
+ * @package crawler
+ * @description
+ *
+ * go build -o gcrawler.exe .\go-env\src\gcrawler
+ *
+ * main.go
+ * 1.初始化的工作
+ * 2.开启ScanUper线程
+ * 3.开启
+ *
+ * 爬虫:
+ *	_, html := utils.NewSimpleHttp().SetHeader().Get(rule.GCrawler["huoli"]["url"])
+ *	//抽取导航栏
+ *	crawler.NewHlCrawler().Nav(html)
+ *	//抽取比赛数据
+ *	crawler.NewHlCrawler().List(html)
+ *	crawler.NewHlCrawler().Match(html)
+ *
+ *	//抽取直播源(暂时不能使用)
+ *	 _,liveHtml := utils.NewSimpleHttp().SetHeader().Get(liveUrl)
+ *	crawler.NewHlCrawler().Live(liveHtml)
+ *
+ * 数据服务:
+ *   MatchService
+ *   比赛数据存储
+ *   service.NewMatchService().Store(match)
+ *   service.NewMatchService().Get3HoursLiveItems()
+ *
+ * 线程任务启动:
+ * 	 thread.NewThread(100, processor.Task, processor.Finished).Run(3, mockyLives(100))
+ * 	 go build -race .\your_path\main.go  // -race 查是否存在竞争
+ */
+import (
+	"fmt"
+	"gcrawler/conf"
+	"gcrawler/crawler"
+	"gcrawler/helper"
+	"gcrawler/model"
+	"gcrawler/processor/demo"
+	"gcrawler/processor/huoli"
+	"gcrawler/rule"
+	"gcrawler/service"
+	"gcrawler/thread"
+	"gcrawler/utils"
+	"math/rand"
+	"time"
+)
+
+func init() {
+	conf.DbConnection()
+}
+
+func main() {
+
+	//_cr()
+	//调试线程任务处理
+	_th()
+	//抓取3小时内的数据,直播数据
+	//_cr_live()
+	//_hlTh()
+
+	//扫描
+	//_scan()
+}
+
+//抓取3小时内的数据,直播数据
+// func _cr_live() {
+// 	ll := service.NewMatchService().Get3HoursLiveItems()
+// 	lenght := len(ll.D)
+// 	for i := 0; i < lenght; i++ {
+// 		//取得播放页面
+// 		_, html := utils.NewSimpleHttp().SetHeader().Get(ll.D[i].LiveAddress)
+// 		liverUrl := crawler.NewHlCrawler().Live(html)
+// 		//取得直播源详细信息
+// 		_, html = utils.NewSimpleHttp().SetHeader().Get(liverUrl)
+// 		livePlays := crawler.NewHlCrawler().VideoAddress(html, ll.D[i])
+// 		//存储
+// 		service.NewLiveService().Store(livePlays)
+// 	}
+// }
+
+//调试火力蜘蛛与MatchService
+func _cr() {
+
+	_, html := utils.NewSimpleHttp().SetHeader().Get(rule.GCrawler["huoli"]["url"])
+	crawler.NewHlCrawler().Nav(html)
+	match := crawler.NewHlCrawler().Match(html)
+	service.NewMatchService().Store(match)
+	//抽取导航栏
+	///crawler.NewHlCrawler().Nav(html)
+	//nav := crawler.NewHlCrawler().Nav(html)
+	//抽取比赛数据
+	//utils.Debug(crawler.NewHlCrawler().List(html))
+	//utils.Debug(crawler.NewHlCrawler().Match(html))
+	//match := crawler.NewHlCrawler().Match(html)
+	//service.NewMatchService().Store(match)
+
+}
+
+//调试线程任务处理
+func _th() {
+	utils.ReadMemoryStats()
+	thread.NewThread(100, demo.Task, demo.Finished).Run(100/2, mockyLives(100))
+	utils.ReadMemoryStats()
+}
+
+//扫描
+func _scan() {
+	for {
+
+		WaitGroupWrapper := &thread.WaitGroupWrapper{}
+		WaitGroupWrapper.Wrap(func() {
+			utils.Debug("scan website ...")
+			//检索
+			_cr()
+			//开始工作
+			_hlTh()
+			//随机睡眠(1-10秒) 让出CPU使用权
+			time.Sleep(time.Duration(rand.Intn(20)) * time.Second)
+		})
+		WaitGroupWrapper.Wait()
+
+	}
+
+}
+
+//调试线程任务(Task/Finished) + 火力爬虫 + 服务调用
+func _hlTh() {
+	utils.ReadMemoryStats()
+	ws, length, r := _ghl()
+	if r != nil {
+		return
+	}
+	thread.NewThread(length, huoli.Task, huoli.Finished).Run(length/2, ws)
+	utils.ReadMemoryStats()
+}
+func _ghl() (ws []thread.Worker, length int, r error) {
+
+	_hlt := service.NewMatchService().Get3HoursLiveItems()
+	lenght := len(_hlt.D)
+
+	//数据为空清空直接 false
+	if lenght < 0 {
+		return nil, 0, model.ERROR_TASK_3HOURS_DATA_EMPTY
+	}
+
+	for i := 0; i < lenght; i++ {
+		worker := thread.Worker{
+			Uuid: helper.GenId(),
+			Type: thread.WORKER_GRAWLER_3HOURS_HUOLI,
+		}
+		worker.Body = utils.Struct2Json(_hlt.D[i])
+		ws = append(ws, worker)
+	}
+
+	return ws, lenght, nil
+}
+
+//mockyLives
+func mockyLives(n int) []thread.Worker {
+	var WorkerSlice []thread.Worker
+	for i := 1; i <= n; i++ {
+		worker := thread.Worker{
+			Uuid: helper.GenId(),
+			Type: thread.WORKER_GRAWLER_3HOURS_HUOLI,
+		}
+
+		//json
+		worker.Body = utils.Struct2Json(model.LivePram{
+			ID:          uint64(i + 100),
+			LiveID:      "CLICENT-GET-" + fmt.Sprintf("%d", i+600023),
+			LiveAddress: "http://www.huolisport.cn/football/" + fmt.Sprintf("%d", i+600023),
+			MatchTime:   "2012-12-04 12:00",
+		})
+
+		//utils.Debug(worker)
+		WorkerSlice = append(WorkerSlice, worker)
+	}
+	return WorkerSlice
+}

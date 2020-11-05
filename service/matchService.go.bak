@@ -1,0 +1,157 @@
+package service
+
+/**
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ *
+ * 定义比赛相关服务
+ *
+ * @author  m.y <j01428@kok.work>
+ * @date
+ * @package crawler
+ * @description
+ *
+ * 说明:
+ * 提供 Store()
+ * 添加流程 team->live->live_list
+ *
+ */
+
+import (
+	"fmt"
+	"gcrawler/contrib/jingo"
+	"gcrawler/helper"
+	"gcrawler/model"
+)
+
+//create for MatchService
+type MatchService struct{}
+
+func NewMatchService() *MatchService {
+	return &MatchService{}
+}
+
+//Get 3 hours of live broadcast
+func (this *MatchService) Get3HoursLiveItems() model.LiveListData {
+	data, err := model.GetLiveList()
+	buf := jingo.NewBufferFromPool()
+	length := len(data.D)
+	if length > 0 && err == nil {
+		jingo.NewStructEncoder(model.LiveListData{}).Marshal(&data, buf)
+		return data
+	}
+	return data
+}
+
+//create for Store
+func (this *MatchService) Store(items map[int]map[string]string,org string) {
+	for _, item := range items {
+		this._store(item,org)
+	}
+}
+
+//relation table(match,team,lives)
+func (this *MatchService) _store(item map[string]string,org string) error {
+	// to or false
+	if !model.IsExist(item["match"]) {
+		model.InsertMatch(item["sportIcon"], item["match"])
+	}
+
+	// match info
+	mifo := &model.MatchInfo{
+		Name:      item["match"],
+		HomeName:  item["homeTitle"],
+		AwayName:  item["teamTitle"],
+		MatchTime: item["matchTime"],
+	}
+
+	mId := model.GetMatchID(item["match"])
+
+	//utils.Debug(mId)
+	//utils.Debug(mifo)
+
+	//if model.IsUniqueMatch(mifo) {
+	//IsRepeatMatch方法 建议优化(涉及新建字段)
+	//使用时候注意 是否重复比赛 {true 表示不重复 false 表示重复}
+	//建议修改成   是否重复比赛 {true 表示重复   false 表示不重复} 逻辑合理点
+	if model.IsRepeatMatch(mifo) {
+		// //主队
+		// hId := this.AddTeam(item["sportIcon"], item["homeTitle"], item["homeIcon"])
+		// // if homeID <= 0 {
+		// // 	return model.ERROR_TEAM_TALBE_INSTER
+		// // }
+		// aId := this.AddTeam(item["sportIcon"], item["teamTitle"], item["teamIcon"])
+		this.addLives(
+			//主队
+			this.addTeam(item["sportIcon"], item["homeTitle"], item["homeIcon"],org),
+			//客队
+			this.addTeam(item["sportIcon"], item["teamTitle"], item["teamIcon"],org),
+			//赛事ID
+			mId,
+			//比赛时间
+			item["matchTime"],
+			//icon
+			item["sportIcon"],
+			//直播地址
+			item["liveAddress"],
+		)
+	}
+
+	return nil
+}
+
+//add Team table
+func (this *MatchService) addTeam(sportIcon string, name string, icon string,org) int {
+	
+	switch org{
+	case "houli":
+		classId:= model.ClassID(sportIcon)
+	case "jrskq":
+		classId:= model.ClassID_kq(sportIcon)
+	case "hakan":
+		classId:= model.ClassID(sportIcon)
+	}
+
+	team := &model.Team{
+		ClassID:  classId,
+		CnName:   name,
+		EnName:   "",
+		ShowName: name,
+		Icon:     icon,
+	}
+	teamID := model.GetTeamID(team.CnName) //获取主队ID
+	if teamID == 0 {
+		model.InsertTeam(team)
+		return model.GetTeamID(team.CnName)
+	}
+	return 0
+}
+
+//add live table
+func (this *MatchService) addLives(hId int, aId int,
+	mId uint64, startTime string, sportIcon string, liveAddress string) {
+	lives := &model.Lives{
+		MatchID:    mId,
+		StartTime:  startTime,
+		HomeTeamID: hId,
+		AwayTeamID: aId,
+	}
+
+	// to table lives
+	model.AddLives(lives, sportIcon)
+	// to table live_list
+	this.addLiveList(hId, aId, mId, startTime, sportIcon, liveAddress)
+}
+
+//add live-list table
+func (this *MatchService) addLiveList(hId int, aId int,
+	mId uint64, startTime string, sportIcon string, liveAddress string) {
+	list := &model.LivePram{
+		ID:          helper.GenId(),
+		LiveID:      fmt.Sprintf("%d", mId),
+		LiveAddress: liveAddress,
+		MatchTime:   startTime,
+	}
+	//utils.Debug(*list)
+	model.AddLiveList(list)
+}
