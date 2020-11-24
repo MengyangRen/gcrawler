@@ -21,16 +21,7 @@
 
 
 ### 基础工作流程
-
-```mermaid
-graph LR
-A[pricessor] -->B(crawler)
-    B --> C[工作线程worker/task]
-    C -->D[task] -->G
-    C -->E[finshed]-->G
-    G[数据存储服务/mysql/redis/mongodb]
-    
-```
+![example-0](https://github.com/MengyangRen/gcrawler/blob/main/doc/example-0.png)
 
 ###其他
  对于刚入Golang坑普通开发者，可能对于Golang的一些特性不甚了解，可能实现有些不太优雅，个人也会持续完善
