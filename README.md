@@ -24,7 +24,7 @@
 ![example-0](https://github.com/MengyangRen/gcrawler/blob/main/doc/example-0.png)
 
 ### 其他
- 对于刚入Golang坑普通开发者，可能对于Golang的一些特性不甚了解，可能实现有些不太优雅，个人也会持续完善
+ 对于刚入Golang坑普通开发者，可能对于Golang的一些特性不甚了解，可能实现有些不太优雅，个人也会持续完善<br>
  Go语言在多线程编程方面是非常有优势的,去整合不同语言的特定功能就再合适不过了
 
  
