@@ -27,13 +27,6 @@ type livingAddress struct {
 	PullUrl string `borm:"pull_url"` // 播流地址
 }
 
-/**
- * @Description: 添加播放资源信息
- * @Author: hunter
- * @Date: 2020-10-22 13:42:27
- * @LastEditTime: 2020-10-22 13:46:10
- * @LastEditors: hunter
- */
 func AddLivingAddress(data *Living) error {
 	// 查询数据库中是否存在这条播放资源
 	id := getLivingID(data)
@@ -59,13 +52,6 @@ func AddLivingAddress(data *Living) error {
 	return nil
 }
 
-/**
- * @Description: 获取播放资源ID
- * @Author: hunter
- * @Date: 2020-10-26 21:57:45
- * @LastEditTime: 2020-10-26 22:00:00
- * @LastEditors: hunter
- */
 func getLivingID(data *Living) uint64 {
 
 	var liveData Living
@@ -83,13 +69,6 @@ func getLivingID(data *Living) uint64 {
 	return 0
 }
 
-/**
- * @Description: 更新播放资源信息
- * @Author: hunter
- * @Date: 2020-10-27 11:05:30
- * @LastEditTime: 2020-10-27 11:15:21
- * @LastEditors: hunter
- */
 func updateLivingAddress(id uint64, pullUrl string) error {
 	t := b.Table(db, "live_play").Debug()
 	model := livingAddress{

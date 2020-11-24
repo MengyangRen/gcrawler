@@ -39,13 +39,6 @@ func IsExist(name string) bool {
 	return true
 }
 
-/**
- * @Description: 添加赛事
- * @Author: hunter
- * @Date: 2020-10-21 15:55:53
- * @LastEditTime: 2020-10-21 15:58:22
- * @LastEditors: hunter
- */
 func InsertMatch(img string, name string) {
 	err := matchFindOne(name)
 	if err != nil {
@@ -63,13 +56,6 @@ func InsertMatch(img string, name string) {
 	}
 }
 
-/**
- * @Description: 判断赛事名称是否有重复
- * @Author: hunter
- * @Date: 2020-10-21 16:29:45
- * @LastEditTime: 2020-10-21 16:35:22
- * @LastEditors: hunter
- */
 func matchFindOne(name string) error {
 	var count int
 
@@ -88,13 +74,6 @@ func matchFindOne(name string) error {
 	return err
 }
 
-/**
- * @Description: 获取赛事类型ID
- * @Author: hunter
- * @Date: 2020-10-21 19:20:17
- * @LastEditTime: 2020-10-21 19:25:22
- * @LastEditors: hunter
- */
 func GetMatchID(name string) uint64 {
 	data := Match{}
 
@@ -108,13 +87,6 @@ func GetMatchID(name string) uint64 {
 	return data.ID
 }
 
-/**
- * @Description: 比赛类型
- * @Author: hunter
- * @Date: 2020-10-22 14:31:53
- * @LastEditTime: 2020-10-22 14:33:00
- * @LastEditors: hunter
- */
 func ClassID(img string) int8 {
 	switch img {
 	case "http://www.huolisport.cn/images/foot.png?v=1.3.3.12":

@@ -19,13 +19,6 @@ type LiveListData struct {
 	D []LivePram `json:"d"`
 }
 
-/**
- * @Description: 添加播放维护地址
- * @Author: hunter
- * @Date: 2020-10-24 16:30:57
- * @LastEditTime: 2020-10-24 16:32:00
- * @LastEditors: hunter
- */
 func AddLiveList(data *LivePram) {
 
 	t := b.Table(db, "live_list").Debug()
@@ -42,13 +35,6 @@ func AddLiveList(data *LivePram) {
 	}
 }
 
-/**
- * @Description: 更新播放维护地址
- * @Author: hunter
- * @Date: 2020-10-27 16:35:57
- * @LastEditTime: 2020-10-27 16:48:11
- * @LastEditors: hunter
- */
 func UpdateLiveList(data *LivePram) {
 	_, err := b.Table(db, "live_list").Debug().Update(&data, b.Where(b.Eq("live_id=?", data.LiveID)))
 
@@ -58,13 +44,6 @@ func UpdateLiveList(data *LivePram) {
 	}
 }
 
-/**
- * @Description: 判断播入维护列表是否已存在
- * @Author: hunter
- * @Date: 2020-10-26 13:16:03
- * @LastEditTime: 2020-10-26 13:17:12
- * @LastEditors: hunter
- */
 func liveListFindOne(url string) error {
 	var count int
 
@@ -83,13 +62,6 @@ func liveListFindOne(url string) error {
 	return err
 }
 
-/**
- * @Description: 获取播放维护地址列表
- * @Author: hunter
- * @Date: 2020-10-24 19:42:00
- * @LastEditTime: 2020-10-24 19:54:25
- * @LastEditors: hunter
- */
 func GetLiveList(wid uint8) (LiveListData, error) {
 	var data LiveListData
 

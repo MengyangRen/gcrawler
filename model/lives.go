@@ -28,13 +28,6 @@ type LivesPram struct {
 	AwayTeamID int    `borm:"away_team_id"` // 客队id
 }
 
-/**
- * @Description: 添加比赛信息
- * @Author: hunter
- * @Date: 2020-10-21 19:37:00
- * @LastEditTime: 2020-10-21 19:39:15
- * @LastEditors: hunter
- */
 func AddLives(data *Lives, sportIcon string) uint64 {
 	data.ID = helper.GenId()
 	data.ClassID = ClassID(sportIcon)
@@ -50,13 +43,6 @@ func AddLives(data *Lives, sportIcon string) uint64 {
 	return data.ID
 }
 
-/**
- * @Description: 获取比赛ID
- * @Author: hunter
- * @Date: 2020-10-30 16:00:05
- * @LastEditTime: 2020-10-30 16:02:15
- * @LastEditors: hunter
- */
 func GetLives(data *LivesPram) string {
 
 	liveData := LivesPram{}
